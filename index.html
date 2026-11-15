@@ -114,7 +114,7 @@ footer { margin-top: 40px; font-size:.9rem; color:var(--ink-2); border-top:1px s
     <p id="shareMsg3">Not affiliated with D2L or the school, but if you use Brightspace this free desktop app lists upcoming due dates in one place: <span class="lnk">schoolsecretary.github.io</span></p>
     <button class="copybtn" type="button" data-copy="shareMsg3">Copy message</button>
     <p class="sr-only" id="shareStatus" role="status" aria-live="polite"></p>
-    <p class="small">Share only where you belong and where sharing is allowed. Never post in Brightspace discussion boards or instructor-run course channels or on shared lab computers, never say it is from D2L or your school, and never ask anyone for a password.</p>
+    <p class="small">Share only where you belong and where sharing is allowed. Never post in Brightspace discussion boards, in instructor-run course channels or on shared lab computers, never say it is from D2L or your school, and never ask anyone for a password.</p>
   </div>
   <p class="small">Brightspace is a trademark of D2L Corporation. School Secretary isn't made by, affiliated with or endorsed by D2L or any school.</p>
 
@@ -168,7 +168,7 @@ var RELEASES = "https://github.com/schoolsecretary/school-secretary/releases/lat
     var btns = document.querySelectorAll("[data-copy]");
     for (var b = 0; b < btns.length; b++) btns[b].onclick = function () {
       make();
-      var btn = this, text = document.getElementById(btn.getAttribute("data-copy")).textContent, was = btn.textContent;
+      var btn = this, text = document.getElementById(btn.getAttribute("data-copy")).textContent, was = btn.was || (btn.was = btn.textContent);
       var failed = function () { say("Copy didn't work here. Select the text above and copy it yourself."); };
       if (!navigator.clipboard) return failed();
       navigator.clipboard.writeText(text).then(function () {
