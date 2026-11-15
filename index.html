@@ -41,6 +41,9 @@ summary { cursor:pointer; font-weight:600; }
 details p { margin-top: 8px; }
 footer { margin-top: 40px; font-size:.9rem; color:var(--ink-2); border-top:1px solid var(--line); padding-top:16px; }
 [hidden] { display:none !important; }
+.share-link { margin: 4px 0 8px; overflow-wrap:anywhere; }
+.share-link code { font-size:.95rem; color:var(--ink); }
+.copybtn { font:inherit; font-size:.95rem; font-weight:600; padding:8px 14px; margin:0 0 14px; border-radius:10px; border:1px solid var(--line); background:var(--accent-soft); color:var(--accent-ink); cursor:pointer; }
 </style>
 </head>
 <body>
@@ -93,9 +96,29 @@ footer { margin-top: 40px; font-size:.9rem; color:var(--ink-2); border-top:1px s
     <p class="small"><a href="https://github.com/schoolsecretary/school-secretary/releases/latest/download/SHA256SUMS.txt" data-zip="SHA256SUMS.txt">Checksums (SHA-256)</a></p>
   </div>
 
+  <h2 id="share">Share School Secretary with someone who uses Brightspace</h2>
+  <p>School Secretary is a free desktop assistant that helps you keep track of your Brightspace courses. It is unofficial: not made by D2L or by any school, and it never does assignments or quiz answers. Send it to a classmate.</p>
+  <div class="card">
+    <strong>Get your link</strong>
+    <p class="share-link"><code id="shareLink">schoolsecretary.github.io</code></p>
+    <button class="copybtn" type="button" data-copy="shareLink">Copy link</button>
+    <p class="small">For people 18 and over. Your link is made in your browser. We don't collect your name, email or anything else to make it. School Secretary can't see who shares a link or who opens it.</p>
+  </div>
+  <div class="card">
+    <strong>What to send</strong>
+    <p id="shareMsg1">This free app shows what's due across your Brightspace courses in one place. It's unofficial (not from D2L or the school) and doesn't do assignments or quizzes: <span class="lnk">schoolsecretary.github.io</span></p>
+    <button class="copybtn" type="button" data-copy="shareMsg1">Copy message</button>
+    <p id="shareMsg2">Finals are coming. This free, unofficial app shows what's due across your Brightspace courses in one place. It doesn't do any work for you: <span class="lnk">schoolsecretary.github.io</span></p>
+    <button class="copybtn" type="button" data-copy="shareMsg2">Copy message</button>
+    <p id="shareMsg3">Not affiliated with D2L or the school, but if you use Brightspace this free desktop app lists upcoming due dates in one place: <span class="lnk">schoolsecretary.github.io</span></p>
+    <button class="copybtn" type="button" data-copy="shareMsg3">Copy message</button>
+    <p class="small">Share only where you belong and where sharing is allowed. Never post in Brightspace discussion boards or instructor-run course channels, never say it is from D2L or your school, and never ask anyone for a password.</p>
+  </div>
+  <p class="small">Brightspace is a trademark of D2L Corporation. School Secretary isn't made by, affiliated with or endorsed by D2L or any school.</p>
+
   <h2 id="privacy">Privacy</h2>
   <p>School Secretary runs on your own computer. You sign in to Brightspace yourself, in a normal browser window, and your course data stays on your computer. Settings has <strong>Wipe school data</strong> to remove the saved sign-in, the database and cached files. AI features are optional and use your own AI account key.</p>
-  <p>This page sets no cookies and has no trackers. The full Privacy page is inside the app, under Settings. To ask what we hold about you, to correct it or to delete it, write to <a href="mailto:schoolsecretary.official@gmail.com">schoolsecretary.official@gmail.com</a>.</p>
+  <p>This page sets no cookies and has no trackers. If you make a share link, your browser remembers your share code on this computer only; it is never sent to us. The full Privacy page is inside the app, under Settings. To ask what we hold about you, to correct it or to delete it, write to <a href="mailto:schoolsecretary.official@gmail.com">schoolsecretary.official@gmail.com</a>.</p>
 
   <h2 id="faq">Questions</h2>
   <details><summary>Is it free?</summary><p>Yes. School Secretary is free to download and use.</p></details>
@@ -116,6 +139,29 @@ var RELEASES = "https://github.com/schoolsecretary/school-secretary/releases/lat
 (function () {
   var links = document.querySelectorAll("[data-zip]");
   for (var i = 0; i < links.length; i++) links[i].href = RELEASES + links[i].getAttribute("data-zip");
+  // Share section: a random code made in this browser only. Nothing is sent
+  // anywhere; this site has no analytics, so the code is only a label.
+  (function () {
+    var code = "";
+    try { code = localStorage.getItem("ss_share_code") || ""; } catch (e) {}
+    if (!/^[a-z0-9]{6}$/.test(code)) {
+      var abc = "abcdefghijkmnpqrstuvwxyz23456789", bytes = new Uint8Array(6);
+      (window.crypto || {}).getRandomValues ? crypto.getRandomValues(bytes) : bytes.forEach(function (_, i) { bytes[i] = Math.random() * 256; });
+      code = "";
+      for (var j = 0; j < 6; j++) code += abc[bytes[j] % abc.length];
+      try { localStorage.setItem("ss_share_code", code); } catch (e) {}
+    }
+    var link = "https://schoolsecretary.github.io/?ref=amb_" + code;
+    document.getElementById("shareLink").textContent = link;
+    var spans = document.querySelectorAll(".lnk");
+    for (var k = 0; k < spans.length; k++) spans[k].textContent = link;
+    var btns = document.querySelectorAll("[data-copy]");
+    for (var b = 0; b < btns.length; b++) btns[b].onclick = function () {
+      var btn = this, text = document.getElementById(btn.getAttribute("data-copy")).textContent, was = btn.textContent;
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = was; }, 1500); });
+    };
+  })();
   var ua = navigator.userAgent || "";
   var phone = /Android|iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
   var cta = document.getElementById("cta");
