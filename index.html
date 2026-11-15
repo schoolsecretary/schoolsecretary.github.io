@@ -44,6 +44,7 @@ footer { margin-top: 40px; font-size:.9rem; color:var(--ink-2); border-top:1px s
 .share-link { margin: 4px 0 8px; overflow-wrap:anywhere; }
 .share-link code { font-size:.95rem; color:var(--ink); }
 .copybtn { font:inherit; font-size:.95rem; font-weight:600; padding:8px 14px; margin:0 0 14px; border-radius:10px; border:1px solid var(--line); background:var(--accent-soft); color:var(--accent-ink); cursor:pointer; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 </style>
 </head>
 <body>
@@ -112,13 +113,14 @@ footer { margin-top: 40px; font-size:.9rem; color:var(--ink-2); border-top:1px s
     <button class="copybtn" type="button" data-copy="shareMsg2">Copy message</button>
     <p id="shareMsg3">Not affiliated with D2L or the school, but if you use Brightspace this free desktop app lists upcoming due dates in one place: <span class="lnk">schoolsecretary.github.io</span></p>
     <button class="copybtn" type="button" data-copy="shareMsg3">Copy message</button>
-    <p class="small">Share only where you belong and where sharing is allowed. Never post in Brightspace discussion boards or instructor-run course channels, never say it is from D2L or your school, and never ask anyone for a password.</p>
+    <p class="sr-only" id="shareStatus" role="status" aria-live="polite"></p>
+    <p class="small">Share only where you belong and where sharing is allowed. Never post in Brightspace discussion boards or instructor-run course channels or on shared lab computers, never say it is from D2L or your school, and never ask anyone for a password.</p>
   </div>
   <p class="small">Brightspace is a trademark of D2L Corporation. School Secretary isn't made by, affiliated with or endorsed by D2L or any school.</p>
 
   <h2 id="privacy">Privacy</h2>
   <p>School Secretary runs on your own computer. You sign in to Brightspace yourself, in a normal browser window, and your course data stays on your computer. Settings has <strong>Wipe school data</strong> to remove the saved sign-in, the database and cached files. AI features are optional and use your own AI account key.</p>
-  <p>This page sets no cookies and has no trackers. This page stores one random share code in your browser (local storage) so your share link stays the same. It stays on this computer and this page doesn't send it anywhere. The code is part of the link you choose to share, so the people you send it to can see it, and so can GitHub, which hosts this page. The full Privacy page is inside the app, under Settings. To ask what we hold about you, to correct it or to delete it, write to <a href="mailto:schoolsecretary.official@gmail.com">schoolsecretary.official@gmail.com</a>.</p>
+  <p>This page sets no cookies and has no trackers. Nothing is stored until you press a Copy button in the share section. Then this page makes one random share code and stores it in your browser (local storage) so your share link stays the same. It stays on this computer and this page doesn't send it anywhere. The code is part of the link you choose to share, so the people you send it to can see it, and so can GitHub, which hosts this page. The full Privacy page is inside the app, under Settings. To ask what we hold about you, to correct it or to delete it, write to <a href="mailto:schoolsecretary.official@gmail.com">schoolsecretary.official@gmail.com</a>.</p>
 
   <h2 id="faq">Questions</h2>
   <details><summary>Is it free?</summary><p>Yes. School Secretary is free to download and use.</p></details>
@@ -139,27 +141,41 @@ var RELEASES = "https://github.com/schoolsecretary/school-secretary/releases/lat
 (function () {
   var links = document.querySelectorAll("[data-zip]");
   for (var i = 0; i < links.length; i++) links[i].href = RELEASES + links[i].getAttribute("data-zip");
-  // Share section: a random code made in this browser only. Nothing is sent
-  // anywhere; this site has no analytics, so the code is only a label.
+  // Share section: a random code made in this browser only, and only when a
+  // Copy button is pressed. Nothing is sent anywhere; this site has no
+  // analytics, so the code is only a label.
   (function () {
     var code = "";
     try { code = localStorage.getItem("ss_share_code") || ""; } catch (e) {}
-    if (!/^[a-z0-9]{6}$/.test(code)) {
+    if (!/^[a-z0-9]{6}$/.test(code)) code = "";
+    function show() {
+      var link = code ? "https://schoolsecretary.github.io/?ref=s_" + code : "https://schoolsecretary.github.io/";
+      document.getElementById("shareLink").textContent = link;
+      var spans = document.querySelectorAll(".lnk");
+      for (var k = 0; k < spans.length; k++) spans[k].textContent = link;
+    }
+    function make() {
+      if (code) return;
       var abc = "abcdefghijkmnpqrstuvwxyz23456789", bytes = new Uint8Array(6);
       (window.crypto || {}).getRandomValues ? crypto.getRandomValues(bytes) : bytes.forEach(function (_, i) { bytes[i] = Math.random() * 256; });
-      code = "";
       for (var j = 0; j < 6; j++) code += abc[bytes[j] % abc.length];
       try { localStorage.setItem("ss_share_code", code); } catch (e) {}
+      show();
     }
-    var link = "https://schoolsecretary.github.io/?ref=s_" + code;
-    document.getElementById("shareLink").textContent = link;
-    var spans = document.querySelectorAll(".lnk");
-    for (var k = 0; k < spans.length; k++) spans[k].textContent = link;
+    if (code) show();
+    var status = document.getElementById("shareStatus");
+    function say(text) { status.textContent = ""; setTimeout(function () { status.textContent = text; }, 50); }
     var btns = document.querySelectorAll("[data-copy]");
     for (var b = 0; b < btns.length; b++) btns[b].onclick = function () {
+      make();
       var btn = this, text = document.getElementById(btn.getAttribute("data-copy")).textContent, was = btn.textContent;
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = was; }, 1500); });
+      var failed = function () { say("Copy didn't work here. Select the text above and copy it yourself."); };
+      if (!navigator.clipboard) return failed();
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = "Copied";
+        say("Copied to your clipboard.");
+        setTimeout(function () { btn.textContent = was; }, 1500);
+      }, failed);
     };
   })();
   var ua = navigator.userAgent || "";
