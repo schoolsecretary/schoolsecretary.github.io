@@ -97,7 +97,7 @@ footer { margin-top: 40px; font-size:.9rem; color:var(--ink-2); border-top:1px s
   </div>
 
   <h2 id="share">Share School Secretary with someone who uses Brightspace</h2>
-  <p>School Secretary is a free desktop assistant that helps you keep track of your Brightspace courses. It is unofficial: not made by D2L or by any school, and it never does assignments or quiz answers. Send it to a classmate.</p>
+  <p>School Secretary is a free desktop assistant that helps you keep track of your Brightspace courses. It is unofficial: not made by D2L or by any school, and it never completes assignments, quizzes or quiz answers. Send it to a classmate.</p>
   <div class="card">
     <strong>Get your link</strong>
     <p class="share-link"><code id="shareLink">schoolsecretary.github.io</code></p>
@@ -118,7 +118,7 @@ footer { margin-top: 40px; font-size:.9rem; color:var(--ink-2); border-top:1px s
 
   <h2 id="privacy">Privacy</h2>
   <p>School Secretary runs on your own computer. You sign in to Brightspace yourself, in a normal browser window, and your course data stays on your computer. Settings has <strong>Wipe school data</strong> to remove the saved sign-in, the database and cached files. AI features are optional and use your own AI account key.</p>
-  <p>This page sets no cookies and has no trackers. If you make a share link, your browser remembers your share code on this computer only; it is never sent to us. The full Privacy page is inside the app, under Settings. To ask what we hold about you, to correct it or to delete it, write to <a href="mailto:schoolsecretary.official@gmail.com">schoolsecretary.official@gmail.com</a>.</p>
+  <p>This page sets no cookies and has no trackers. This page stores one random share code in your browser (local storage) so your share link stays the same. It stays on this computer and this page doesn't send it anywhere. The code is part of the link you choose to share, so the people you send it to can see it, and so can GitHub, which hosts this page. The full Privacy page is inside the app, under Settings. To ask what we hold about you, to correct it or to delete it, write to <a href="mailto:schoolsecretary.official@gmail.com">schoolsecretary.official@gmail.com</a>.</p>
 
   <h2 id="faq">Questions</h2>
   <details><summary>Is it free?</summary><p>Yes. School Secretary is free to download and use.</p></details>
@@ -151,7 +151,7 @@ var RELEASES = "https://github.com/schoolsecretary/school-secretary/releases/lat
       for (var j = 0; j < 6; j++) code += abc[bytes[j] % abc.length];
       try { localStorage.setItem("ss_share_code", code); } catch (e) {}
     }
-    var link = "https://schoolsecretary.github.io/?ref=amb_" + code;
+    var link = "https://schoolsecretary.github.io/?ref=s_" + code;
     document.getElementById("shareLink").textContent = link;
     var spans = document.querySelectorAll(".lnk");
     for (var k = 0; k < spans.length; k++) spans[k].textContent = link;
